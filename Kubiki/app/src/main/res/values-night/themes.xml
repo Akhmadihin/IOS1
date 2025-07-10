@@ -1,0 +1,14 @@
+<resources>
+    <!-- Base application theme -->
+    <style name="Theme.Kubiki" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Статус-бар -->
+        <item name="android:statusBarColor">@color/black</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- Навигационная панель -->
+        <item name="android:navigationBarColor">@color/black</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <!-- Важно: разрешаем системе управлять отступами -->
+        <item name="android:fitsSystemWindows">true</item>
+    </style>
+</resources>
