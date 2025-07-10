@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Kubiki" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        
+        <item name="android:statusBarColor">@color/black</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        
+        <item name="android:navigationBarColor">@color/black</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        
+        <item name="android:fitsSystemWindows">true</item>
+    </style>
+</resources>
