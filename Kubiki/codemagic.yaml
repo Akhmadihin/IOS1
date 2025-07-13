@@ -2,19 +2,28 @@ workflows:
   ios-workflow:
     name: iOS Build
     environment:
-      flutter: "stable"
-      xcode: "latest"
+      flutter: "stable" # или конкретная версия, например "3.19.5"
+      xcode: "15.2"
     scripts:
+      - name: Validate Project Structure
+        script: |
+          echo "Current directory: $(pwd)"
+          ls -la
+          if [ ! -f "pubspec.yaml" ]; then
+            echo "ERROR: pubspec.yaml not found in root directory!"
+            exit 1
+          fi
+
       - name: Setup Flutter
         script: |
-          flutter --version
-          flutter pub cache repair
           flutter clean
-          
-      - name: Get dependencies
+          flutter pub cache repair
+          rm -rf pubspec.lock .flutter-plugins .flutter-plugins-dependencies
+
+      - name: Get Dependencies
         script: |
+          cd "$CM_BUILD_DIR" # Важно: переход в корень проекта
           flutter pub get --verbose
-          flutter pub deps
 
       - name: Build iOS
         script: |
