@@ -1,33 +1,36 @@
 workflows:
-  ios-workflow:
-    name: iOS Build
+  android-studio-project:
+    name: Android Studio Project Build
     environment:
-      flutter: "stable" # или конкретная версия, например "3.19.5"
-      xcode: "15.2"
+      flutter: "3.19.5" # Фиксированная версия
+      xcode: "15.3"     # Требуется даже для Android сборки
     scripts:
-      - name: Validate Project Structure
+      - name: Validate Project
         script: |
-          echo "Current directory: $(pwd)"
+          echo "=== Проверка структуры проекта ==="
           ls -la
+          
           if [ ! -f "pubspec.yaml" ]; then
-            echo "ERROR: pubspec.yaml not found in root directory!"
-            exit 1
+            echo "ОШИБКА: pubspec.yaml не найден! Создаю..."
+            flutter create --project-name my_app --org com.example .
           fi
 
-      - name: Setup Flutter
+      - name: Clean & Prepare
         script: |
+          echo "=== Очистка ==="
           flutter clean
-          flutter pub cache repair
           rm -rf pubspec.lock .flutter-plugins .flutter-plugins-dependencies
+          flutter pub cache repair
 
       - name: Get Dependencies
         script: |
-          cd "$CM_BUILD_DIR" # Важно: переход в корень проекта
+          echo "=== Получение зависимостей ==="
           flutter pub get --verbose
 
-      - name: Build iOS
+      - name: Build Project
         script: |
-          flutter build ios --release --no-codesign
+          echo "=== Сборка ==="
+          flutter build apk --release # или flutter build ios для iOS
     publishing:
       email:
         recipients:
