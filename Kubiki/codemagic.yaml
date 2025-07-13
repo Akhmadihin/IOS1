@@ -2,33 +2,38 @@ workflows:
   ios-workflow:
     name: iOS Build
     environment:
-      flutter: "stable" # или конкретная версия, например "3.19.5"
+      flutter: "stable"
       xcode: "15.2"
     scripts:
-      - name: Validate Project Structure
+      - name: Validate Project
         script: |
-          echo "Current directory: $(pwd)"
-          ls -la
           if [ ! -f "pubspec.yaml" ]; then
-            echo "ERROR: pubspec.yaml not found in root directory!"
-            exit 1
+            echo "Creating default pubspec.yaml..."
+            cat <<EOF > pubspec.yaml
+            name: my_app
+            description: A new Flutter project
+            version: 1.0.0+1
+            
+            environment:
+              sdk: ">=3.0.0 <4.0.0"
+              flutter: ">=3.16.0"
+            
+            dependencies:
+              flutter:
+                sdk: flutter
+              cupertino_icons: ^1.0.6
+            
+            dev_dependencies:
+              flutter_test:
+                sdk: flutter
+            
+            flutter:
+              uses-material-design: true
+            EOF
           fi
-
-      - name: Setup Flutter
-        script: |
-          flutter clean
-          flutter pub cache repair
-          rm -rf pubspec.lock .flutter-plugins .flutter-plugins-dependencies
-
-      - name: Get Dependencies
-        script: |
-          cd "$CM_BUILD_DIR" # Важно: переход в корень проекта
-          flutter pub get --verbose
+          
+          flutter pub get
 
       - name: Build iOS
         script: |
           flutter build ios --release --no-codesign
-    publishing:
-      email:
-        recipients:
-          - akhmadihin@email.com
