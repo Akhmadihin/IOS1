@@ -9,4 +9,4 @@ workflows:
     publishing:
       email:
         recipients:
-          - your@email.com
+          - akhmadihin@email.com
