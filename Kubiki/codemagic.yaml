@@ -21,7 +21,7 @@ workflows:
             flutter create --Kubiki kubiki --org com.example .
           else
             echo "Обновляю существующий проект..."
-            flutter create --platforms=android,ios --project-name my_app --org com.example .
+            flutter create --platforms=android,ios --Kubiki kubiki --org com.example .
           fi
 
       - name: Get Dependencies
@@ -37,7 +37,7 @@ workflows:
       - name: Build
         script: |
           echo "=== СБОРКА ==="
-          # ИЛИ для iOS:
+          flutter pub get
           flutter build ios --release --no-codesign
     publishing:
       email:
