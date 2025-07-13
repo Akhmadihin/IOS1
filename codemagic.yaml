@@ -3,9 +3,22 @@ workflows:
     name: iOS Build
     environment:
       flutter: "stable"
+      xcode: "latest"
     scripts:
-      - flutter pub get
-      - flutter build ios --release --no-codesign
+      - name: Setup Flutter
+        script: |
+          flutter --version
+          flutter pub cache repair
+          flutter clean
+          
+      - name: Get dependencies
+        script: |
+          flutter pub get --verbose
+          flutter pub deps
+
+      - name: Build iOS
+        script: |
+          flutter build ios --release --no-codesign
     publishing:
       email:
         recipients:
