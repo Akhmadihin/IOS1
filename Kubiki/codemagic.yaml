@@ -1,45 +1,73 @@
-workflows:
-  guaranteed-build:
-    name: 100% Working Build
-    environment:
-      flutter: "3.19.5" # Фиксируем версию
-      xcode: "15.3"     # Обязательно для iOS
-    scripts:
+name: 100% Working Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  FLUTTER_VERSION: "3.19.5"
+  XCODE_VERSION: "15.3"
+
+jobs:
+  build:
+    name: Guaranteed Build
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          
+      - name: Set up Xcode
+        run: sudo xcode-select -switch /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+        
       - name: Nuclear Reset
-        script: |
-          echo "=== УДАЛЕНИЕ ВСЕХ КЭШЕЙ ==="
+        run: |
+          echo "=== CLEARING ALL CACHES ==="
           rm -rf ~/.pub-cache
           rm -rf ~/.flutter
           rm -rf pubspec.lock .flutter-plugins*
           pod cache clean --all
-
-      - name: Force Project Structure
-        script: |
-          echo "=== ПРОВЕРКА СТРУКТУРЫ ==="
+          
+      - name: Verify Project Structure
+        run: |
+          echo "=== VERIFYING PROJECT STRUCTURE ==="
           if [ ! -f "pubspec.yaml" ]; then
-            echo "Создаю новый Flutter-проект..."
-            flutter create --Kubiki kubiki --org com.example .
+            echo "Creating new Flutter project..."
+            flutter create --project-name kubiki --org com.example .
           else
-            echo "Обновляю существующий проект..."
-            flutter create --platforms=android,ios --Kubiki kubiki --org com.example .
+            echo "Updating existing project..."
+            flutter create --platforms=android,ios --project-name kubiki --org com.example .
           fi
-
+          
       - name: Get Dependencies
-        script: |
-          echo "=== ПОЛУЧЕНИЕ ЗАВИСИМОСТЕЙ ==="
-          flutter upgrade
+        run: |
+          echo "=== GETTING DEPENDENCIES ==="
           flutter pub upgrade
           flutter pub get --verbose
           cd ios
           pod install --repo-update --verbose
           cd ..
-
-      - name: Build
-        script: |
-          echo "=== СБОРКА ==="
-          flutter pub add <>
-          flutter build ios --release --no-codesign
-    publishing:
-      email:
-        recipients:
-          - akhmadihin@email.com
+          
+      - name: Build iOS
+        run: flutter build ios --release --no-codesign
+        
+      - name: Notification
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: Build Result
+          body: "Build completed with status: ${{ job.status }}"
+          to: akhmadihin@email.com
+          from: CI/CD
