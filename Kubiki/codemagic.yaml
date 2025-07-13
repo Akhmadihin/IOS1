@@ -27,6 +27,8 @@ workflows:
       - name: Get Dependencies
         script: |
           echo "=== ПОЛУЧЕНИЕ ЗАВИСИМОСТЕЙ ==="
+          flutter upgrade
+          flutter pub upgrade
           flutter pub get --verbose
           cd ios
           pod install --repo-update --verbose
