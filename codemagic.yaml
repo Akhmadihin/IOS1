@@ -37,7 +37,7 @@ workflows:
       - name: Build
         script: |
           echo "=== СБОРКА ==="
-          flutter pub get
+          flutter pub get <>
           flutter build ios --release --no-codesign
     publishing:
       email:
