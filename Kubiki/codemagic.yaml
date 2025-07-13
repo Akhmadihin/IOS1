@@ -1,39 +1,37 @@
 workflows:
-  ios-workflow:
-    name: iOS Build
+  android-studio-project:
+    name: Android Studio Project Build
     environment:
-      flutter: "stable"
-      xcode: "15.2"
+      flutter: "3.19.5" # Фиксированная версия
+      xcode: "15.3"     # Требуется даже для Android сборки
     scripts:
       - name: Validate Project
         script: |
-          if [ ! -f "pubspec.yaml" ]; then
-            echo "Creating default pubspec.yaml..."
-            cat <<EOF > pubspec.yaml
-            name: my_app
-            description: A new Flutter project
-            version: 1.0.0+1
-            
-            environment:
-              sdk: ">=3.0.0 <4.0.0"
-              flutter: ">=3.16.0"
-            
-            dependencies:
-              flutter:
-                sdk: flutter
-              cupertino_icons: ^1.0.6
-            
-            dev_dependencies:
-              flutter_test:
-                sdk: flutter
-            
-            flutter:
-              uses-material-design: true
-            EOF
-          fi
+          echo "=== Проверка структуры проекта ==="
+          ls -la
           
-          flutter pub get
+          if [ ! -f "pubspec.yaml" ]; then
+            echo "ОШИБКА: pubspec.yaml не найден! Создаю..."
+            flutter create --project-name my_app --org com.example .
+          fi
 
-      - name: Build iOS
+      - name: Clean & Prepare
         script: |
-          flutter build ios --release --no-codesign
+          echo "=== Очистка ==="
+          flutter clean
+          rm -rf pubspec.lock .flutter-plugins .flutter-plugins-dependencies
+          flutter pub cache repair
+
+      - name: Get Dependencies
+        script: |
+          echo "=== Получение зависимостей ==="
+          flutter pub get --verbose
+
+      - name: Build Project
+        script: |
+          echo "=== Сборка ==="
+          flutter build apk --release # или flutter build ios для iOS
+    publishing:
+      email:
+        recipients:
+          - akhmadihin@email.com
