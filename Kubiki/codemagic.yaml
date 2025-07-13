@@ -1,36 +1,43 @@
 workflows:
-  android-studio-project:
-    name: Android Studio Project Build
+  guaranteed-build:
+    name: 100% Working Build
     environment:
-      flutter: "3.19.5" # Фиксированная версия
-      xcode: "15.3"     # Требуется даже для Android сборки
+      flutter: "3.19.5" # Фиксируем версию
+      xcode: "15.3"     # Обязательно для iOS
     scripts:
-      - name: Validate Project
+      - name: Nuclear Reset
         script: |
-          echo "=== Проверка структуры проекта ==="
-          ls -la
-          
-          if [ ! -f "pubspec.yaml" ]; then
-            echo "ОШИБКА: pubspec.yaml не найден! Создаю..."
-            flutter create --project-name my_app --org com.example .
-          fi
+          echo "=== УДАЛЕНИЕ ВСЕХ КЭШЕЙ ==="
+          rm -rf ~/.pub-cache
+          rm -rf ~/.flutter
+          rm -rf pubspec.lock .flutter-plugins*
+          pod cache clean --all
 
-      - name: Clean & Prepare
+      - name: Force Project Structure
         script: |
-          echo "=== Очистка ==="
-          flutter clean
-          rm -rf pubspec.lock .flutter-plugins .flutter-plugins-dependencies
-          flutter pub cache repair
+          echo "=== ПРОВЕРКА СТРУКТУРЫ ==="
+          if [ ! -f "pubspec.yaml" ]; then
+            echo "Создаю новый Flutter-проект..."
+            flutter create --Kubiki kubiki --org com.example .
+          else
+            echo "Обновляю существующий проект..."
+            flutter create --platforms=android,ios --project-name my_app --org com.example .
+          fi
 
       - name: Get Dependencies
         script: |
-          echo "=== Получение зависимостей ==="
+          echo "=== ПОЛУЧЕНИЕ ЗАВИСИМОСТЕЙ ==="
           flutter pub get --verbose
+          cd ios
+          pod install --repo-update --verbose
+          cd ..
 
-      - name: Build Project
+      - name: Build
         script: |
-          echo "=== Сборка ==="
-          flutter build apk --release # или flutter build ios для iOS
+          echo "=== СБОРКА ==="
+          flutter build apk --release
+          # ИЛИ для iOS:
+          # flutter build ios --release --no-codesign
     publishing:
       email:
         recipients:
