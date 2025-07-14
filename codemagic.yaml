@@ -7,8 +7,8 @@ on:
     branches: [ main ]
 
 env:
-  FLUTTER_VERSION: "3.19.5"
-  XCODE_VERSION: "15.3"
+  FLUTTER_VERSION: "3.32.6"
+  XCODE_VERSION: "16.4"
 
 jobs:
   build:
@@ -40,21 +40,42 @@ jobs:
         run: |
           echo "=== VERIFYING PROJECT STRUCTURE ==="
           if [ ! -f "pubspec.yaml" ]; then
-            echo "Creating new Flutter project..."
-            flutter create --project-name kubiki --org com.example .
+            echo "ERROR: No pubspec.yaml found - project structure invalid!"
+            ls -la  # Debug directory contents
+            exit 1
           else
-            echo "Updating existing project..."
-            flutter create --platforms=ios --project-name kubiki --org com.example .
+            echo "Valid Flutter project found"
           fi
+
+      - name: Verify Flutter Installation
+        run: |
+          echo "=== FLUTTER VERSION ==="
+          flutter --version
+          echo "=== PUB SPEC ==="
+          cat pubspec.yaml || echo "No pubspec.yaml found"
+
+      - name: Debug Directory Structure
+        run: |
+          echo "=== CURRENT DIRECTORY CONTENTS ==="
+          ls -la
+          echo "=== FLUTTER DOCTOR ==="
+          flutter doctor -v
+      - name: Cache Flutter Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pub-cache
+            **/build/
+          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
           
       - name: Get Dependencies
         run: |
           echo "=== GETTING DEPENDENCIES ==="
-          flutter pub upgrade
+          if [ ! -f "pubspec.yaml" ]; then
+            echo "ERROR: No pubspec.yaml found in $(pwd)"
+            exit 1
+          fi
           flutter pub get --verbose
-          cd ios
-          pod install --repo-update --verbose
-          cd ..
           
       - name: Build iOS
         run: flutter build ios --release --no-codesign
