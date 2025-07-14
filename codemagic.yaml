@@ -44,7 +44,7 @@ jobs:
             flutter create --project-name kubiki --org com.example .
           else
             echo "Updating existing project..."
-            flutter create --platforms=android,ios --project-name kubiki --org com.example .
+            flutter create --platforms=ios --project-name kubiki --org com.example .
           fi
           
       - name: Get Dependencies
